@@ -1,0 +1,44 @@
+{
+    "dispute_header": {
+        "dispute_id": "disp_Nz9K83jL01aQ",
+        "razorpay_payment_id": "pay_Nz9K83jL01aQ",
+        "generated_at": "2026-08-31T13:51:19.598012+00:00",
+        "merchant": "Zomato / Blinkit",
+        "dispute_reason": "UNAUTHORIZED_TRANSACTION_FRAUD"
+    },
+    "evidence_summary": {
+        "digital_footprint": {
+            "ip_address": "152.57.12.4",
+            "ip_isp": "Airtel Broadband",
+            "ip_geo_city": "Mumbai, MH",
+            "device_fingerprint_hash": "a8f9c211e0df92b4",
+            "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X)",
+            "transaction_timestamp": "2026-08-31T13:42:10Z"
+        },
+        "authentication_logs": {
+            "two_factor_auth_passed": true,
+            "otp_method": "SMS_TO_REGISTERED_MOBILE",
+            "otp_delivery_timestamp": "2026-08-31T13:41:55Z",
+            "otp_verification_timestamp": "2026-08-31T13:42:08Z",
+            "phone_number_verified": "+919876543210"
+        },
+        "fulfillment_proof": {
+            "delivery_status": "DELIVERED",
+            "delivery_timestamp": "2026-08-31T14:05:22Z",
+            "delivery_partner_id": "DP_88392",
+            "gps_coordinates": {
+                "latitude": 19.076,
+                "longitude": 72.8777,
+                "address_match": true,
+                "distance_to_dropoff_meters": 4.2
+            },
+            "delivery_photo_url": "https://cdn.zomato.com/proofs/pay_Nz9K83jL01aQ_drop.jpg"
+        },
+        "merchant_account_history": {
+            "account_created_date": "2024-03-15",
+            "total_prior_successful_orders": 42,
+            "total_prior_chargebacks": 0,
+            "customer_email": "user_test@domain.com"
+        }
+    }
+}
