@@ -75,7 +75,19 @@ curl -X 'POST' \
 
 ```mermaid
 graph TD
-    %% Node Definitions & Custom Styling
+    A["⚡ 1. Razorpay Webhook Ingestion"]
+    B["🔄 2. Feature Fusion & Preprocessing"]
+    C["🧠 3. Dual-Head ML Inference"]
+    D["🧮 4. Cost Loss Engine τ*"]
+    E["🚦 5. Operational Decision Router"]
+    F["📄 6. Chargeback Evidence Dossier"]
+
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E -.->|On Dispute / High Risk| F
+
     classDef ingestion fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc;
     classDef processing fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc;
     classDef model fill:#311042,stroke:#c084fc,stroke-width:2px,color:#f8fafc;
@@ -83,21 +95,13 @@ graph TD
     classDef router fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc;
     classDef dossier fill:#14532d,stroke:#4ade80,stroke-width:2px,color:#f8fafc;
 
-    A["⚡ 1. Razorpay Webhook Ingestion"] ::: ingestion
-    B["🔄 2. Feature Fusion & Preprocessing"] ::: processing
-    C["🧠 3. Dual-Head ML Inference"] ::: model
-    D["🧮 4. Cost Loss Engine τ*"] ::: loss
-    E["🚦 5. Operational Decision Router"] ::: router
-    F["📄 6. Chargeback Evidence Dossier"] ::: dossier
+    class A ingestion;
+    class B processing;
+    class C model;
+    class D loss;
+    class E router;
+    class F dossier;
 
-    %% Workflow Connections
-    A --> B
-    B --> C
-    C --> D
-    D --> E
-    E -.->|On Dispute / High Risk| F
-
-    %% Interactive Anchor Links
     click A "#1-webhook-ingestion-layer" "Jump to Ingestion Layer Details"
     click B "#2-feature-fusion--preprocessing" "Jump to Feature Engineering Details"
     click C "#3-dual-head-ml-inference-engine" "Jump to Dual-Head Model Architecture"
