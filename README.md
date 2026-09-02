@@ -71,43 +71,29 @@ curl -X 'POST' \
 
 ## 🗺️ Interactive System Workflow
 
-> 💡 **Tip:** Click on any tile in the flowchart below to jump directly to its underlying architectural details, operational logic, and documentation.
+> 💡 **Tip:** Click on any node in the flowchart below to jump directly to its detailed architecture section!
 
 ```mermaid
-graph TD
-    A["⚡ 1. Razorpay Webhook Ingestion"]
-    B["🔄 2. Feature Fusion & Preprocessing"]
-    C["🧠 3. Dual-Head ML Inference"]
-    D["🧮 4. Cost Loss Engine τ*"]
-    E["🚦 5. Operational Decision Router"]
-    F["📄 6. Chargeback Evidence Dossier"]
+flowchart TD
+    A["⚡ 1. Razorpay Webhook Ingestion"] --> B["🔄 2. Feature Fusion & Preprocessing"]
+    B --> C["🧠 3. Dual-Head ML Inference"]
+    C --> D["🧮 4. Cost Loss Engine τ*"]
+    D --> E["🚦 5. Operational Decision Router"]
+    E -.->|On Dispute / High Risk| F["📄 6. Chargeback Evidence Dossier"]
 
-    A --> B
-    B --> C
-    C --> D
-    D --> E
-    E -.->|On Dispute / High Risk| F
+    style A fill:#0d2538,stroke:#38bdf8,stroke-width:2px,color:#e0f2fe
+    style B fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#e0e7ff
+    style C fill:#3b0764,stroke:#c084fc,stroke-width:2px,color:#fae8ff
+    style D fill:#450a0a,stroke:#f87171,stroke-width:2px,color:#fee2e2
+    style E fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#d1fae5
+    style F fill:#14532d,stroke:#4ade80,stroke-width:2px,color:#dcfce7
 
-    classDef ingestion fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc;
-    classDef processing fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc;
-    classDef model fill:#311042,stroke:#c084fc,stroke-width:2px,color:#f8fafc;
-    classDef loss fill:#450a0a,stroke:#f87171,stroke-width:2px,color:#f8fafc;
-    classDef router fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#f8fafc;
-    classDef dossier fill:#14532d,stroke:#4ade80,stroke-width:2px,color:#f8fafc;
-
-    class A ingestion;
-    class B processing;
-    class C model;
-    class D loss;
-    class E router;
-    class F dossier;
-
-    click A "#1-webhook-ingestion-layer" "Jump to Ingestion Layer Details"
-    click B "#2-feature-fusion--preprocessing" "Jump to Feature Engineering Details"
-    click C "#3-dual-head-ml-inference-engine" "Jump to Dual-Head Model Architecture"
-    click D "#4-cost-sensitive-loss-engine-τ" "Jump to Loss Optimization Mechanics"
-    click E "#5-operational-decision-router" "Jump to Decision Routing Matrix"
-    click F "#6-automated-chargeback-dossier-generator" "Jump to Dossier Generation Engine"
+    click A "#1-webhook-ingestion-layer" "Jump to Webhook Ingestion"
+    click B "#2-feature-fusion--preprocessing" "Jump to Feature Preprocessing"
+    click C "#3-dual-head-ml-inference-engine" "Jump to ML Inference Engine"
+    click D "#4-cost-sensitive-loss-engine-τ" "Jump to Cost-Sensitive Loss Engine"
+    click E "#5-operational-decision-router" "Jump to Operational Decision Router"
+    click F "#6-automated-chargeback-dossier-generator" "Jump to Chargeback Dossier Generator"
 ```
 
 ---
@@ -125,7 +111,7 @@ graph TD
 * **Module:** `main.py` / `encoder.pkl`
 * **Function:** Transforms raw categorical values (card network, payment mode) using a pre-fitted Ordinal Encoder. Combines gateway payload metrics with merchant context metrics:
   * **Device-Account Density:** Number of distinct accounts bound to the hardware signature.
-  * **Geographic Discrepancy:** Geodesic distance ($\text{km}$) between IP geolocation and physical delivery drop-off point.
+  * **Geographic Discrepancy:** Geodesic distance (km) between IP geolocation and physical delivery drop-off point.
   * **Velocity Counters:** Rapid-fire order counts within 30-minute rolling windows.
 
 ---
@@ -135,12 +121,18 @@ graph TD
 * **Architecture:** Parallel `HistGradientBoostingClassifier` estimators trained to decouple fraud vectors:
 
 ```mermaid
-graph LR
+flowchart LR
     Input[Unified Telemetry Vector] --> Head1[Head 1: Payment Fraud Estimator]
     Input --> Head2[Head 2: Refund Abuse Estimator]
     
-    Head1 --> Score1["Probability of Payment Fraud (p_fraud)"]
-    Head2 --> Score2["Probability of Refund Abuse (p_abuse)"]
+    Head1 --> Score1[Probability of Payment Fraud]
+    Head2 --> Score2[Probability of Refund Abuse]
+
+    style Input fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc
+    style Head1 fill:#311042,stroke:#c084fc,stroke-width:2px,color:#f8fafc
+    style Head2 fill:#311042,stroke:#c084fc,stroke-width:2px,color:#f8fafc
+    style Score1 fill:#450a0a,stroke:#f87171,stroke-width:2px,color:#f8fafc
+    style Score2 fill:#450a0a,stroke:#f87171,stroke-width:2px,color:#f8fafc
 ```
 
 * **Head 1 (Payment Fraud):** Predicts likelihood of stolen credentials, card testing, or identity theft prior to order dispatch.
@@ -149,7 +141,7 @@ graph LR
 ---
 
 ### <a id="4-cost-sensitive-loss-engine-τ"></a>4. Cost-Sensitive Loss Engine ($\tau^*$)
-* **Concept:** Standard models default to an arbitrary $0.50$ decision boundary. In fintech, asymmetric costs dictate that **False Negatives** (undetected fraud resulting in chargeback penalties and inventory loss) are significantly more expensive than **False Positives** (user friction during checkout).
+* **Concept:** Standard models default to an arbitrary 0.50 decision boundary. In fintech, asymmetric costs dictate that **False Negatives** (undetected fraud resulting in chargeback penalties and inventory loss) are significantly more expensive than **False Positives** (user friction during checkout).
 * **Optimization Formula:** ShieldPay finds the exact optimal threshold $\tau^*$ that minimizes expected financial loss over the validation dataset:
 
 $$\tau^* = \arg\min_{\tau \in [0, 1]} \sum_{i=1}^{N} \left[ \mathbf{1}_{\{y_i = 1, \hat{y}_i(\tau) = 0\}} \cdot \text{Cost}_{\text{FN}} + \mathbf{1}_{\{y_i = 0, \hat{y}_i(\tau) = 1\}} \cdot \text{Cost}_{\text{FP}} \right]$$
@@ -162,7 +154,7 @@ $$\tau^* = \arg\min_{\tau \in [0, 1]} \sum_{i=1}^{N} \left[ \mathbf{1}_{\{y_i = 
 
 ### <a id="5-operational-decision-router"></a>5. Operational Decision Router
 * **Module:** `main.py` -> Decision Logic Matrix
-* **Function:** Translates raw continuous probability scores $(p_{\text{fraud}}, p_{\text{abuse}})$ into automated downstream operational directives:
+* **Function:** Translates raw continuous probability scores into automated downstream operational directives:
 
 | Vector | Probability Range | Action Triggered | Operational Impact |
 | :--- | :--- | :--- | :--- |
