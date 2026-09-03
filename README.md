@@ -9,45 +9,38 @@
 
 ---
 
-## ⚡ Quickstart Guide (Production Setup)
+## 🌐 Industry Context & Real-World Threat Vectors
 
-Follow these steps to deploy and run ShieldPay locally in under 2 minutes:
+Standard rule engines and gateway checks operate in siloes, leaving quick-commerce platforms exposed to asymmetric financial liabilities. ShieldPay addresses four pervasive, high-frequency threat vectors documented across Indian fintech and global retail ecosystems:
 
-### 1. Clone & Setup Environment
+1. **Automated Card-Testing & Micro-Transaction Attacks:** Fraud syndicates deploy automated scripts to execute fast, low-value orders across payment gateways to validate stolen credit card dumps before executing high-value purchases. Detecting these requires real-time velocity counters and sub-minute anomaly scoring, as highlighted in [Razorpay's Fraud Analytics Architecture](https://razorpay.com/blog/what-is-fraud-analytics/).
+2. **Escalating Cyber Fraud in Digital Payments:** Cybercrime reports involving digital transactions have scaled past 2.4 million complaints in India alone, totaling over ₹22,000 Crore in financial losses as tracked in [RBI Cyber Fraud Analyses](https://economictimes.indiatimes.com/industry/banking/finance/banking/rbi-is-right-to-act-on-digital-payment-fraud-but-some-safeguards-need-sharper-design/articleshow/132309496.cms). Static heuristics fail against these low-value micro-transaction attacks.
+3. **Card-Not-Present (CNP) International Liability Shifts:** When processing cross-border payments, international issuing banks frequently bypass 3D-Secure (2FA / OTP) verification. When a foreign cardholder files a dispute, the merchant bears 100% of the chargeback liability plus gateway penalty fees ($15–$25 per dispute), as detailed in [Razorpay’s International Chargeback Documentation](https://razorpay.com/blog/international-payment-chargebacks-for-indian-businesses-how-to-win-prevent-and-handle-them/).
+4. **Post-Fulfillment Refund & "Item Not Received" (INR) Abuse:** Post-delivery fraud represents a major loss driver, with industry benchmarks from the National Retail Federation indicating that [13.7% of all returns involve fraudulent claims](https://nrf.com/media-center/press-releases/nrf-and-appriss-retail-report-743-billion-merchandise-returned-2023). In quick-commerce, bad actors leverage multi-account rotation and device fingerprint spoofing to claim non-existent missing items or empty boxes.
+
+---
+
+## ⚡ Quickstart Guide
+
+### Track 1: Instant Production Deployment (30 Seconds)
+*Use pre-trained model artifacts (`model_fraud.pkl`, `model_abuse.pkl`, `encoder.pkl`) already optimized and bundled in the repository.*
 
 ```bash
-# Clone the repository
+# 1. Clone repository
 git clone [https://github.com/chanakya-b/shieldpay-risk-engine.git](https://github.com/chanakya-b/shieldpay-risk-engine.git)
 cd shieldpay-risk-engine
 
-# Create and activate virtual environment
+# 2. Setup environment & install dependencies
 python3 -m venv venv
 source venv/bin/activate
-```
-
-### 2. Install Dependencies
-
-```bash
 pip install scikit-learn pandas numpy fastapi uvicorn joblib pydantic requests
-```
 
-### 3. Pipeline Initialization (Dataset & Models)
-
-```bash
-# Generate telemetry dataset and train dual-head ML estimators
-python3 generate_zomato_dataset.py
-python3 eval_metrics.py
-```
-
-### 4. Launch Production API Server
-
-```bash
+# 3. Launch production API server
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
-* **Interactive API Docs (Swagger UI):** Visit `http://127.0.0.1:8000/docs`
+* **Interactive API Documentation (Swagger UI):** Visit `http://127.0.0.1:8000/docs`
 
-### 5. Run Immediate Sanity Check
-
+#### Run Immediate Sanity Check:
 ```bash
 curl -X 'POST' \
   '[http://127.0.0.1:8000/api/v1/score-webhook](http://127.0.0.1:8000/api/v1/score-webhook)' \
@@ -69,9 +62,18 @@ curl -X 'POST' \
 
 ---
 
-## 🗺️ Interactive System Workflow
+### Track 2: Full Pipeline Retraining & Benchmark Evaluation (Optional)
+*Regenerate synthetic telemetry, re-fit ordinal encoders, and re-tune cost-sensitive decision boundaries.*
 
-> 💡 **Tip:** Click on any node in the flowchart below to jump directly to its detailed architecture section!
+```bash
+# Generate telemetry dataset and train dual-head ML estimators
+python3 generate_zomato_dataset.py
+python3 eval_metrics.py
+```
+
+---
+
+## 🗺️ Interactive System Workflow
 
 ```mermaid
 flowchart TD
@@ -80,45 +82,41 @@ flowchart TD
     C --> D["🧮 4. Cost Loss Engine τ*"]
     D --> E["🚦 5. Operational Decision Router"]
     E -.->|On Dispute / High Risk| F["📄 6. Chargeback Evidence Dossier"]
-
-    style A fill:#0d2538,stroke:#38bdf8,stroke-width:2px,color:#e0f2fe
-    style B fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#e0e7ff
-    style C fill:#3b0764,stroke:#c084fc,stroke-width:2px,color:#fae8ff
-    style D fill:#450a0a,stroke:#f87171,stroke-width:2px,color:#fee2e2
-    style E fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#d1fae5
-    style F fill:#14532d,stroke:#4ade80,stroke-width:2px,color:#dcfce7
-
-    click A "#1-webhook-ingestion-layer" "Jump to Webhook Ingestion"
-    click B "#2-feature-fusion--preprocessing" "Jump to Feature Preprocessing"
-    click C "#3-dual-head-ml-inference-engine" "Jump to ML Inference Engine"
-    click D "#4-cost-sensitive-loss-engine-τ" "Jump to Cost-Sensitive Loss Engine"
-    click E "#5-operational-decision-router" "Jump to Operational Decision Router"
-    click F "#6-automated-chargeback-dossier-generator" "Jump to Chargeback Dossier Generator"
 ```
+
+### Quick Architecture Navigation
+* [1. Webhook Ingestion Layer](#1-webhook-ingestion-layer)
+* [2. Feature Fusion & Preprocessing](#2-feature-fusion--preprocessing)
+* [3. Dual-Head ML Inference Engine](#3-dual-head-ml-inference-engine)
+* [4. Cost-Sensitive Loss Engine ($\tau^*$)](#4-cost-sensitive-loss-engine-τ)
+* [5. Operational Decision Router](#5-operational-decision-router)
+* [6. Automated Chargeback Dossier Generator](#6-automated-chargeback-dossier-generator)
 
 ---
 
-## 🏛️ System Architecture Deep-Dive
+## 🏛️ System Architecture & Value Rationale
 
 ### <a id="1-webhook-ingestion-layer"></a>1. Webhook Ingestion Layer
 * **Module:** `main.py` -> Endpoint: `POST /api/v1/score-webhook`
-* **Latency Guarantee:** Sub-50ms execution budget.
-* **Function:** Ingests raw JSON payloads from Razorpay payment webhooks alongside real-time client metadata. Accepts attributes including payment method, card network, order amount, and transaction velocity indicators.
+* **Execution Budget:** Sub-50ms latency limit.
+* **Architecture Decision:** Ingests raw JSON payloads from Razorpay payment webhooks alongside real-time client metadata. Captures payment method, card network, transaction amount, and rolling velocity counters.
+* **Value Rationale:** Payment gateways only evaluate transaction parameters, whereas quick-commerce apps only evaluate cart contents. Intercepting the webhook at the backend middleware level allows ShieldPay to bridge this gap before kitchen dispatch or fulfillment occurs.
 
 ---
 
 ### <a id="2-feature-fusion--preprocessing"></a>2. Feature Fusion & Preprocessing
 * **Module:** `main.py` / `encoder.pkl`
-* **Function:** Transforms raw categorical values (card network, payment mode) using a pre-fitted Ordinal Encoder. Combines gateway payload metrics with merchant context metrics:
-  * **Device-Account Density:** Number of distinct accounts bound to the hardware signature.
-  * **Geographic Discrepancy:** Geodesic distance (km) between IP geolocation and physical delivery drop-off point.
-  * **Velocity Counters:** Rapid-fire order counts within 30-minute rolling windows.
+* **Architecture Decision:** Combines gateway payload parameters with merchant-side device telemetry through an `OrdinalEncoder`:
+  * **Device-Account Density:** Tracks the number of distinct user accounts associated with a single hardware device ID.
+  * **Geographic Discrepancy:** Calculates geodesic distance ($\text{km}$) between the user's IP address location and physical delivery drop-off coordinates.
+  * **Velocity Counters:** Tracks order frequency within rolling 30-minute windows.
+* **Value Rationale:** Neither gateway logs nor app logs alone contain enough signal to catch sophisticated fraudsters. Fusing payment and physical telemetry exposes proxy usage, device farming, and card-testing patterns.
 
 ---
 
 ### <a id="3-dual-head-ml-inference-engine"></a>3. Dual-Head ML Inference Engine
 * **Module:** `eval_metrics.py` / `model_fraud.pkl` / `model_abuse.pkl`
-* **Architecture:** Parallel `HistGradientBoostingClassifier` estimators trained to decouple fraud vectors:
+* **Architecture Decision:** Decouples inference into two specialized `HistGradientBoostingClassifier` models:
 
 ```mermaid
 flowchart LR
@@ -127,49 +125,49 @@ flowchart LR
     
     Head1 --> Score1[Probability of Payment Fraud]
     Head2 --> Score2[Probability of Refund Abuse]
-
-    style Input fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#f8fafc
-    style Head1 fill:#311042,stroke:#c084fc,stroke-width:2px,color:#f8fafc
-    style Head2 fill:#311042,stroke:#c084fc,stroke-width:2px,color:#f8fafc
-    style Score1 fill:#450a0a,stroke:#f87171,stroke-width:2px,color:#f8fafc
-    style Score2 fill:#450a0a,stroke:#f87171,stroke-width:2px,color:#f8fafc
 ```
 
-* **Head 1 (Payment Fraud):** Predicts likelihood of stolen credentials, card testing, or identity theft prior to order dispatch.
-* **Head 2 (Refund Abuse):** Predicts probability of post-delivery claim abuse (e.g., false "item missing" or empty-box claims) based on historical refund ratios and account age.
+* **Why Decouple into Dual Heads?** Pre-fulfillment payment fraud (e.g., stolen cards, IP proxies) and post-delivery refund abuse (e.g., false claims, high refund ratios) operate on opposing statistical distributions. A unified single-head model suffers from *negative task interference*, where optimization for payment fraud degrades refund abuse precision. Decoupling allows independent retraining, custom feature weighting, and individual loss minimization.
 
 ---
 
 ### <a id="4-cost-sensitive-loss-engine-τ"></a>4. Cost-Sensitive Loss Engine ($\tau^*$)
-* **Concept:** Standard models default to an arbitrary 0.50 decision boundary. In fintech, asymmetric costs dictate that **False Negatives** (undetected fraud resulting in chargeback penalties and inventory loss) are significantly more expensive than **False Positives** (user friction during checkout).
-* **Optimization Formula:** ShieldPay finds the exact optimal threshold $\tau^*$ that minimizes expected financial loss over the validation dataset:
+* **Module:** `eval_metrics.py`
+* **Architecture Decision:** Standard ML models default to an arbitrary $0.50$ decision boundary designed to maximize raw accuracy or F1 score. In fintech, asymmetric costs mean **False Negatives** (undetected fraud leading to chargeback penalties and stolen inventory) are significantly more costly than **False Positives** (user friction during checkout).
+* **Optimization Formula:** ShieldPay identifies the optimal threshold $\tau^*$ that minimizes total financial loss over validation data:
 
 $$\tau^* = \arg\min_{\tau \in [0, 1]} \sum_{i=1}^{N} \left[ \mathbf{1}_{\{y_i = 1, \hat{y}_i(\tau) = 0\}} \cdot \text{Cost}_{\text{FN}} + \mathbf{1}_{\{y_i = 0, \hat{y}_i(\tau) = 1\}} \cdot \text{Cost}_{\text{FP}} \right]$$
 
 #### Financial Asymmetry Parameters
-* **Payment Fraud:** $\text{Cost}_{\text{FN}} = \text{₹}2,000$ vs. $\text{Cost}_{\text{FP}} = \text{₹}300$ ($\tau^* = 0.10$)
-* **Refund Abuse:** $\text{Cost}_{\text{FN}} = \text{₹}800$ vs. $\text{Cost}_{\text{FP}} = \text{₹}250$ ($\tau^* = 0.35$)
+* **Payment Fraud Head:** $\text{Cost}_{\text{FN}} = \text{₹}2,000$ vs. $\text{Cost}_{\text{FP}} = \text{₹}300 \implies \tau^* = 0.10$
+* **Refund Abuse Head:** $\text{Cost}_{\text{FN}} = \text{₹}800$ vs. $\text{Cost}_{\text{FP}} = \text{₹}250 \implies \tau^* = 0.35$
 
 ---
 
 ### <a id="5-operational-decision-router"></a>5. Operational Decision Router
-* **Module:** `main.py` -> Decision Logic Matrix
-* **Function:** Translates raw continuous probability scores into automated downstream operational directives:
 
-| Vector | Probability Range | Action Triggered | Operational Impact |
+#### Bridging ML Thresholds ($\tau^*$) to Multi-Tiered Operations
+An ML threshold ($\tau^*$) identifies the point where financial risk exceeds normal bounds. However, flat-blocking every transaction above $\tau^*$ causes unnecessary customer drop-off. ShieldPay bridges ML inference and operations using a 3-tier risk routing matrix:
+
+1. **Frictionless Tier ($p < \tau^*$):** Risk is below cost threshold. Proceed with instant checkout or automated refund.
+2. **Step-Up Verification Tier ($\tau^* \le p < \text{Hard Block Threshold}$):** Risk exceeds threshold $\tau^*$, but is not high enough to warrant an outright block. Apply targeted friction (3DS OTP challenge or photo proof requirement).
+3. **Hard-Block Tier ($p \ge \text{Hard Block Threshold}$):** High-confidence fraud. Block the transaction or deny the refund to protect platform capital.
+
+| Risk Vector | Probability Range | Operational Action | Business Impact & Design Rationale |
 | :--- | :--- | :--- | :--- |
-| **Payment Fraud** | $p < 0.15$ | `AUTO_APPROVE` | Express checkout, instant kitchen dispatch. |
-| **Payment Fraud** | $0.15 \le p < 0.50$ | `STEP_UP_OTP_REQUIRED` | Triggers 3DS mandatory OTP verification. |
-| **Payment Fraud** | $p \ge 0.50$ | `HARD_CANCEL_TRANSACTION` | Immediate payment drop & card flag. |
-| **Refund Abuse** | $p < 0.25$ | `INSTANT_REFUND_APPROVED` | Immediate bot-approved wallet refund. |
-| **Refund Abuse** | $0.25 \le p < 0.50$ | `REQUIRE_UNBOXING_PHOTO_PROOF` | Requires photo proof before refund processing. |
-| **Refund Abuse** | $p \ge 0.50$ | `DENY_AUTO_REFUND_ROUTE_TO_AGENT` | Blocks auto-refund; creates agent review ticket. |
+| **Payment Fraud** | $p < 0.10$ ($\tau^*$) | `AUTO_APPROVE` | Frictionless 1-click checkout for trusted users. |
+| **Payment Fraud** | $0.10 \le p < 0.50$ | `STEP_UP_OTP_REQUIRED` | Triggers 3DS mandatory OTP verification to stop unauthorized card use. |
+| **Payment Fraud** | $p \ge 0.50$ | `HARD_CANCEL_TRANSACTION` | Drops high-risk attempts to eliminate gateway fees and chargeback liability. |
+| **Refund Abuse** | $p < 0.35$ ($\tau^*$) | `INSTANT_REFUND_APPROVED` | Instant wallet credit for legitimate customers with clean account histories. |
+| **Refund Abuse** | $0.35 \le p < 0.65$ | `REQUIRE_UNBOXING_PHOTO_PROOF` | Mandates photo proof before processing claims for suspicious accounts. |
+| **Refund Abuse** | $p \ge 0.65$ | `DENY_AUTO_REFUND_ROUTE_TO_AGENT` | Blocks auto-refunds and routes edge cases to human support agents. |
 
 ---
 
 ### <a id="6-automated-chargeback-dossier-generator"></a>6. Automated Chargeback Dossier Generator
 * **Module:** `evidence_generator.py` -> Endpoint: `GET /api/v1/generate-dispute-dossier/{payment_id}`
-* **Function:** Automatically aggregates transaction metadata, 2FA OTP verification logs, delivery partner GPS proximity markers, and historical customer interactions into a formatted JSON representment payload ready for submission to Razorpay's Dispute API.
+* **Architecture Decision:** Automatically aggregates transaction logs, 2FA OTP verification timestamps, delivery partner GPS proximity markers, and historical account activity into a structured JSON representment payload ready for Razorpay's Dispute API.
+* **Value Rationale:** Winning chargeback disputes requires submitting evidence within tight windows (often 3 business days). Automating dossier generation increases dispute recovery rates while eliminating manual operational overhead.
 
 ---
 
