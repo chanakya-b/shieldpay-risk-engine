@@ -34,41 +34,40 @@ Modern quick-commerce operating in India faces distinct financial threat vectors
 
 ```mermaid
 flowchart TD
-    %% Ingestion Layer
     subgraph Ingestion ["1. INGESTION & OBSERVABILITY LAYER"]
-        A[Razorpay Webhook Payload] --> B[ObservabilityMiddleware]
-        B -->|Inject X-Request-ID & X-Execution-Time-MS| C[Strict Pydantic v2 Contract]
+        A["Razorpay Webhook Payload"] --> B["ObservabilityMiddleware"]
+        B -->|"Inject X-Request-ID & X-Execution-Time-MS"| C["Strict Pydantic v2 Contract"]
     end
 
-    %% Feature & Inference Layer
     subgraph Engine ["2. FEATURE FUSION & DUAL-HEAD ML"]
-        C --> D{Feature Fusion Engine}
-        D -->|Device & IP Telemetry| E["Payment Fraud Head (model_fraud.pkl)"]
-        D -->|Behavioral History| F["Refund Abuse Head (model_abuse.pkl)"]
+        C --> D{"Feature Fusion Engine"}
+        D -->|"Device & IP Telemetry"| E["Payment Fraud Head (model_fraud.pkl)"]
+        D -->|"Behavioral History"| F["Refund Abuse Head (model_abuse.pkl)"]
     end
 
-    %% Cost Optimization & Decision Router
     subgraph Decision ["3. COST ENGINE & OPERATIONAL ROUTER"]
-        E --> G["Financial Loss Minimizer (τ* = 0.15)"]
-        F --> H["Financial Loss Minimizer (τ* = 0.35)"]
-        G --> I[Operational Decision Router]
+        E --> G["Financial Loss Minimizer (Threshold = 0.15)"]
+        F --> H["Financial Loss Minimizer (Threshold = 0.35)"]
+        G --> I["Operational Decision Router"]
         H --> I
     end
 
-    %% Execution & Evidence
     subgraph Output ["4. ACTION & DISPUTE EVIDENCE LAYER"]
-        I -->|Low Risk| J["AUTO_APPROVE (Dispatch to Kitchen)"]
-        I -->|Medium Risk| K["STEP_UP_OTP_REQUIRED (Hold Pending Verification)"]
-        I -->|High Risk| L["HARD_CANCEL_TRANSACTION (Prevent Fraud)"]
-        I -->|Dispute Event| M["Chargeback Evidence Generator (Razorpay Dossier)"]
+        I -->|"Low Risk"| J["AUTO_APPROVE (Dispatch to Kitchen)"]
+        I -->|"Medium Risk"| K["STEP_UP_OTP_REQUIRED (Hold Verification)"]
+        I -->|"High Risk"| L["HARD_CANCEL_TRANSACTION (Prevent Fraud)"]
+        I -->|"Dispute Event"| M["Chargeback Evidence Generator (Razorpay Dossier)"]
     end
 
-    %% Styling
     classDef Ingestion fill:#1e293b,stroke:#3b82f6,color:#fff
     classDef Engine fill:#0f172a,stroke:#8b5cf6,color:#fff
     classDef Decision fill:#1e1b4b,stroke:#ec4899,color:#fff
     classDef Output fill:#064e3b,stroke:#10b981,color:#fff
-    class classDef
+
+    class A,B,C Ingestion
+    class D,E,F Engine
+    class G,H,I Decision
+    class J,K,L,M Output
 ```
 
 ---
@@ -147,14 +146,14 @@ ShieldPay translates raw probabilities $(P_{\text{fraud}}, P_{\text{abuse}})$ in
           └───────────────────────────────────────┴───────────────────────┴───────┘
 ```
 
-| Risk Vector | Probability Range | System Decision Enum | Order Status Enum | Operational Impact |
-| :--- | :--- | :--- | :--- | :--- |
-| **Payment Fraud** | $P < 0.15$ | `AUTO_APPROVE` | `DISPATCHED_TO_KITCHEN` | Zero-friction instant dispatch. |
-| **Payment Fraud** | $0.15 \le P < 0.50$ | `STEP_UP_OTP_REQUIRED` | `HOLD_PENDING_VERIFICATION` | Triggers 2FA/3DS OTP re-verification before order acceptance. |
-| **Payment Fraud** | $P \ge 0.50$ | `HARD_CANCEL_TRANSACTION` | `CANCELLED_FRAUD_PREVENTION` | Rejects transaction; releases merchant inventory immediately. |
-| **Refund Abuse** | $P < 0.35$ | `INSTANT_REFUND_APPROVED` | — | Instant automated refund payout to original payment method. |
-| **Refund Abuse** | $0.35 \le P < 0.65$ | `REQUIRE_UNBOXING_PHOTO_PROOF` | — | Prompts customer to upload item photo proof before refund processing. |
-| **Refund Abuse** | $P \ge 0.65$ | `DENY_AUTO_REFUND_ROUTE_TO_AGENT` | — | Blocks auto-refund; escalates ticket to senior fraud operations team. |
+| Risk Vector | Probability | Action / Decision | Operational Impact & Rationale |
+| :--- | :--- | :--- | :--- |
+| **Payment Fraud** | $P < 0.15$ | `AUTO_APPROVE`<br><sub>Status: `DISPATCHED_TO_KITCHEN`</sub> | Zero-friction order acceptance and instant kitchen dispatch for seamless merchant checkout. |
+| **Payment Fraud** | $0.15 \le P < 0.50$ | `STEP_UP_OTP_REQUIRED`<br><sub>Status: `HOLD_PENDING_VERIFICATION`</sub> | Triggers 2FA / 3DS OTP re-verification to confirm cardholder identity before order acceptance. |
+| **Payment Fraud** | $P \ge 0.50$ | `HARD_CANCEL_TRANSACTION`<br><sub>Status: `CANCELLED_FRAUD_PREVENTION`</sub> | Rejects transaction immediately, preventing chargeback fines and releasing reserved inventory. |
+| **Refund Abuse** | $P < 0.35$ | `INSTANT_REFUND_APPROVED` | Grants instant automated payout to customer's original payment method for verified accounts. |
+| **Refund Abuse** | $0.35 \le P < 0.65$ | `REQUIRE_UNBOXING_PHOTO_PROOF` | Prompts customer to upload item photo proof before initiating manual or automated refund. |
+| **Refund Abuse** | $P \ge 0.65$ | `DENY_AUTO_REFUND_ROUTE_TO_AGENT` | Blocks automated refund payout; routes ticket to senior fraud risk team for detailed review. |
 
 ---
 
