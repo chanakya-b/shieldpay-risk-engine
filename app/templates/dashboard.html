@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShieldPay — Real-Time Risk Operations Dashboard</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --border-color: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-red: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation / Controls */
+        .sidebar {
+            width: 380px;
+            background-color: #0d1322;
+            border-right: 1px solid var(--border-color);
+            padding: 24px;
+            overflow-y: auto;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+        }
+
+        .sidebar-header {
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar-header p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--accent-blue);
+            margin: 20px 0 12px 0;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-blue);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .range-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .range-slider-container input[type="range"] {
+            flex: 1;
+        }
+
+        .range-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--accent-blue);
+            width: 45px;
+            text-align: right;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            margin-top: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-submit:hover {
+            opacity: 0.95;
+        }
+
+        .btn-submit:active {
+            transform: scale(0.98);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            margin-left: 380px;
+            flex: 1;
+            padding: 32px 40px;
+            max-width: 1200px;
+        }
+
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .navbar-title h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .navbar-title p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .badge-bar {
+            display: flex;
+            gap: 10px;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .badge-green {
+            background-color: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: var(--accent-green);
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .metric-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-main);
+        }
+
+        .metric-sub {
+            font-size: 0.75rem;
+            color: var(--accent-green);
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Verdicts Card Container */
+        .verdicts-container {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .verdicts-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .verdicts-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .verdict-box {
+            background-color: #0f172a;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .verdict-box-title {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .badge-action {
+            display: inline-block;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 0.02em;
+        }
+
+        .action-approve {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid #059669;
+        }
+
+        .action-stepup {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border: 1px solid #d97706;
+        }
+
+        .action-block {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+            border: 1px solid #dc2626;
+        }
+
+        /* Code/JSON Inspector */
+        .inspector-container {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .inspector-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        pre {
+            background-color: #0b0f19;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: #38bdf8;
+            max-height: 300px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Simulation Controls -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>🛡️ ShieldPay</h2>
+            <p>Razorpay Webhook Interceptor & Risk Engine</p>
+        </div>
+
+        <form id="webhook-form">
+            <div class="section-title">💳 Gateway Parameters</div>
+            <div class="form-group">
+                <label for="payment_id">Razorpay Payment ID</label>
+                <input type="text" id="payment_id" class="form-control" value="pay_Nz9K83jL01aQ" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="amount_inr">Amount (₹)</label>
+                    <input type="number" id="amount_inr" class="form-control" value="1299" step="50" required>
+                </div>
+                <div class="form-group">
+                    <label for="payment_method">Method</label>
+                    <select id="payment_method" class="form-control" onchange="toggleCardNetwork()">
+                        <option value="credit_card">Credit Card</option>
+                        <option value="upi">UPI</option>
+                        <option value="netbanking">Netbanking</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group" id="card-network-group">
+                    <label for="card_network">Card Network</label>
+                    <select id="card_network" class="form-control">
+                        <option value="visa">Visa</option>
+                        <option value="mastercard">Mastercard</option>
+                        <option value="rupay">RuPay</option>
+                        <option value="amex">Amex</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="promo_applied">Promo Applied</label>
+                    <select id="promo_applied" class="form-control">
+                        <option value="No">No</option>
+                        <option value="Yes">Yes</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section-title">👤 Merchant Account History</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="account_age_days">Account Age (Days)</label>
+                    <input type="number" id="account_age_days" class="form-control" value="14" required>
+                </div>
+                <div class="form-group">
+                    <label for="past_order_count">Past Orders</label>
+                    <input type="number" id="past_order_count" class="form-control" value="5" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="past_refund_ratio">Past Refund Ratio</label>
+                <div class="range-slider-container">
+                    <input type="range" id="past_refund_ratio" min="0" max="1" step="0.01" value="0.05" oninput="document.getElementById('refund-val').innerText = (this.value * 100).toFixed(0) + '%'">
+                    <span id="refund-val" class="range-val">5%</span>
+                </div>
+            </div>
+
+            <div class="section-title">📍 Velocity & Hardware Telemetry</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="orders_30m">Orders (Last 30m)</label>
+                    <input type="number" id="orders_30m" class="form-control" value="2" required>
+                </div>
+                <div class="form-group">
+                    <label for="device_accounts">Device Accounts</label>
+                    <input type="number" id="device_accounts" class="form-control" value="1" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="ip_dist">IP-to-Delivery Distance (km)</label>
+                <input type="number" id="ip_dist" class="form-control" value="3.5" step="0.5" required>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                🚀 Score Webhook Transaction
+            </button>
+        </form>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <div class="navbar">
+            <div class="navbar-title">
+                <h1>ShieldPay Operations Center</h1>
+                <p>Live Dual-Head Risk Scoring Engine connected to FastAPI Server</p>
+            </div>
+            <div class="badge-bar">
+                <span class="badge badge-green">⚡ Sub-50ms SLA</span>
+                <span class="badge">Strict Pydantic v2</span>
+                <span class="badge">Loss Optimal τ*</span>
+            </div>
+        </div>
+
+        <!-- Metrics Row -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">Execution Latency</div>
+                <div class="metric-value" id="val-latency">-- ms</div>
+                <div class="metric-sub">✓ Target &lt; 50ms SLA</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Inference Status</div>
+                <div class="metric-value" id="val-status">SCORED</div>
+                <div class="metric-sub">✓ Active ML Model</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">P(Payment Fraud)</div>
+                <div class="metric-value" id="val-pfraud">0.0000</div>
+                <div class="metric-sub">Threshold τ* = 0.15</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">P(Refund Abuse)</div>
+                <div class="metric-value" id="val-pabuse">0.0000</div>
+                <div class="metric-sub">Threshold τ* = 0.35</div>
+            </div>
+        </div>
+
+        <!-- Operational Decision Verdicts -->
+        <div class="verdicts-container">
+            <div class="verdicts-title">🎯 Operational Decision Verdicts</div>
+            <div class="verdicts-grid">
+                <div class="verdict-box">
+                    <div class="verdict-box-title">Pre-Fulfillment Action</div>
+                    <div id="verdict-action" class="badge-action action-approve">AUTO_APPROVE</div>
+                </div>
+                <div class="verdict-box">
+                    <div class="verdict-box-title">Kitchen / Fulfillment Status</div>
+                    <div id="verdict-status" class="badge-action action-approve">DISPATCHED_TO_KITCHEN</div>
+                </div>
+                <div class="verdict-box">
+                    <div class="verdict-box-title">Post-Delivery Refund Policy</div>
+                    <div id="verdict-refund" class="badge-action action-approve">INSTANT_REFUND_APPROVED</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- JSON Inspector -->
+        <div class="inspector-container">
+            <div class="inspector-header">
+                <h3>🔍 Response Contract & Headers Inspector</h3>
+                <button onclick="fetchDossier()" style="background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                    📄 Generate Dispute Dossier
+                </button>
+            </div>
+            <pre id="json-output">// Click "Score Webhook Transaction" to execute live REST call...</pre>
+        </div>
+    </div>
+
+    <script>
+        function toggleCardNetwork() {
+            const method = document.getElementById('payment_method').value;
+            const networkGroup = document.getElementById('card-network-group');
+            if (method === 'credit_card') {
+                networkGroup.style.display = 'block';
+            } else {
+                networkGroup.style.display = 'none';
+            }
+        }
+
+        document.getElementById('webhook-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const payload = {
+                payment_id: document.getElementById('payment_id').value,
+                amount_inr: parseFloat(document.getElementById('amount_inr').value),
+                payment_method: document.getElementById('payment_method').value,
+                card_network: document.getElementById('payment_method').value === 'credit_card' ? document.getElementById('card_network').value : 'none',
+                is_promo_applied: document.getElementById('promo_applied').value === 'Yes' ? 1 : 0,
+                account_age_days: parseInt(document.getElementById('account_age_days').value),
+                past_order_count: parseInt(document.getElementById('past_order_count').value),
+                past_refund_ratio: parseFloat(document.getElementById('past_refund_ratio').value),
+                orders_in_last_30mins: parseInt(document.getElementById('orders_30m').value),
+                device_account_count: parseInt(document.getElementById('device_accounts').value),
+                ip_to_delivery_dist_km: parseFloat(document.getElementById('ip_dist').value)
+            };
+
+            const t0 = performance.now();
+            try {
+                const response = await fetch('/api/v1/score-webhook', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Request-ID': 'web-ui-' + Math.random().toString(36).substring(7)
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const t1 = performance.now();
+                const execMs = response.headers.get('x-execution-time-ms') || (t1 - t0).toFixed(2);
+                const data = await response.json();
+
+                document.getElementById('val-latency').innerText = execMs + ' ms';
+                document.getElementById('val-status').innerText = data.status || 'SCORED';
+
+                if (data.risk_scores) {
+                    document.getElementById('val-pfraud').innerText = data.risk_scores.p_payment_fraud !== null ? data.risk_scores.p_payment_fraud.toFixed(4) : 'N/A';
+                    document.getElementById('val-pabuse').innerText = data.risk_scores.p_refund_abuse !== null ? data.risk_scores.p_refund_abuse.toFixed(4) : 'N/A';
+                }
+
+                if (data.decisions) {
+                    const actionEl = document.getElementById('verdict-action');
+                    actionEl.innerText = data.decisions.pre_fulfillment_action;
+                    if (data.decisions.pre_fulfillment_action === 'AUTO_APPROVE') {
+                        actionEl.className = 'badge-action action-approve';
+                    } else if (data.decisions.pre_fulfillment_action === 'STEP_UP_OTP_REQUIRED') {
+                        actionEl.className = 'badge-action action-stepup';
+                    } else {
+                        actionEl.className = 'badge-action action-block';
+                    }
+
+                    document.getElementById('verdict-status').innerText = data.decisions.order_status;
+                    document.getElementById('verdict-refund').innerText = data.decisions.post_delivery_refund_policy;
+                }
+
+                document.getElementById('json-output').innerText = JSON.stringify({
+                    headers: {
+                        'x-execution-time-ms': execMs,
+                        'x-request-id': response.headers.get('x-request-id')
+                    },
+                    body: data
+                }, null, 2);
+
+            } catch (err) {
+                document.getElementById('json-output').innerText = '// Error connecting to API server: ' + err.message;
+            }
+        });
+
+        async function fetchDossier() {
+            const pid = document.getElementById('payment_id').value;
+            try {
+                const response = await fetch('/api/v1/generate-dispute-dossier/' + pid);
+                const data = await response.json();
+                document.getElementById('json-output').innerText = JSON.stringify(data, null, 2);
+            } catch (err) {
+                document.getElementById('json-output').innerText = '// Error fetching dispute dossier: ' + err.message;
+            }
+        }
+    </script>
+</body>
+</html>

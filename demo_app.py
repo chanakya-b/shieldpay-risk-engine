@@ -108,68 +108,14 @@ st.markdown(
 st.divider()
 
 # ---------------------------------------------------------------------------
-# Sidebar Inputs & Scenario Presets
+# Sidebar Inputs
 # ---------------------------------------------------------------------------
 st.sidebar.header("🕹️ Simulation Controls")
 
-st.sidebar.subheader("Quick Scenario Presets")
-col_p1, col_p2, col_p3 = st.sidebar.columns(3)
-
-preset = None
-if col_p1.button("🟢 Normal", help="Standard legitimate food order"):
-    preset = "normal"
-if col_p2.button("🟡 Card Bot", help="High-velocity card testing attack"):
-    preset = "bot"
-if col_p3.button("🔴 Refund Abuse", help="Account with high refund history"):
-    preset = "abuse"
-
-# Default values based on preset
-if preset == "normal":
-    def_amt, def_age, def_orders, def_refund, def_vel, def_dev, def_dist = (
-        450.0,
-        180,
-        45,
-        0.02,
-        0,
-        1,
-        1.2,
-    )
-elif preset == "bot":
-    def_amt, def_age, def_orders, def_refund, def_vel, def_dev, def_dist = (
-        12500.0,
-        1,
-        0,
-        0.00,
-        8,
-        4,
-        38.5,
-    )
-elif preset == "abuse":
-    def_amt, def_age, def_orders, def_refund, def_vel, def_dev, def_dist = (
-        850.0,
-        12,
-        3,
-        0.65,
-        1,
-        2,
-        2.1,
-    )
-else:
-    def_amt, def_age, def_orders, def_refund, def_vel, def_dev, def_dist = (
-        1299.0,
-        14,
-        5,
-        0.05,
-        2,
-        1,
-        3.5,
-    )
-
-st.sidebar.markdown("---")
 st.sidebar.subheader("💳 Gateway Parameters")
 payment_id = st.sidebar.text_input("Razorpay Payment ID", value="pay_Nz9K83jL01aQ")
 amount_inr = st.sidebar.number_input(
-    "Amount (₹)", min_value=1.0, max_value=500000.0, value=def_amt, step=50.0
+    "Amount (₹)", min_value=1.0, max_value=500000.0, value=1299.0, step=50.0
 )
 payment_method = st.sidebar.selectbox(
     "Payment Method", ["credit_card", "upi", "netbanking"]
@@ -179,34 +125,35 @@ card_network = (
     if payment_method == "credit_card"
     else "none"
 )
-is_promo_applied = st.sidebar.selectbox("Promo Code Applied", [0, 1], index=0)
+promo_choice = st.sidebar.selectbox("Promo Code Applied", ["No", "Yes"], index=0)
+is_promo_applied = 1 if promo_choice == "Yes" else 0
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("👤 User Account Context")
 account_age_days = st.sidebar.number_input(
-    "Account Age (Days)", min_value=0, value=def_age
+    "Account Age (Days)", min_value=0, value=14
 )
 past_order_count = st.sidebar.number_input(
-    "Past Orders", min_value=0, value=def_orders
+    "Past Orders", min_value=0, value=5
 )
 past_refund_ratio = st.sidebar.slider(
     "Past Refund Ratio",
     min_value=0.0,
     max_value=1.0,
-    value=def_refund,
+    value=0.05,
     step=0.01,
 )
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("📍 Velocity & Hardware Telemetry")
 orders_in_last_30mins = st.sidebar.number_input(
-    "Orders (Last 30 mins)", min_value=0, value=def_vel
+    "Orders (Last 30 mins)", min_value=0, value=2
 )
 device_account_count = st.sidebar.number_input(
-    "Accounts on Device", min_value=1, value=def_dev
+    "Accounts on Device", min_value=1, value=1
 )
 ip_to_delivery_dist_km = st.sidebar.number_input(
-    "IP to Delivery GPS (km)", min_value=0.0, value=def_dist, step=0.5
+    "IP to Delivery GPS (km)", min_value=0.0, value=3.5, step=0.5
 )
 
 st.sidebar.markdown("---")

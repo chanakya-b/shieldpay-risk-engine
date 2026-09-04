@@ -20,9 +20,9 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 
 from app.api.v1.router import router as v1_router
 from app.services.inference import load_artifacts
@@ -98,12 +98,49 @@ def create_app() -> FastAPI:
     app.include_router(v1_router)
 
     # -----------------------------------------------------------------------
-    # Health / root endpoint
+    # Web UI Dashboard & Health endpoints
     # -----------------------------------------------------------------------
     @app.get(
+        "/dashboard",
+        tags=["Dashboard"],
+        summary="Interactive Operations Dashboard",
+        response_class=HTMLResponse,
+    )
+    async def serve_dashboard():
+        from pathlib import Path
+        template_path = Path(__file__).parent / "templates" / "dashboard.html"
+        if template_path.exists():
+            return HTMLResponse(content=template_path.read_text(encoding="utf-8"))
+        return HTMLResponse(content="<h1>ShieldPay Dashboard</h1>")
+
+    @app.get(
         "/",
+        tags=["Health / Dashboard"],
+        summary="Root endpoint (Dashboard / JSON Health)",
+    )
+    async def root_endpoint(request: Request):
+        accept_header = request.headers.get("accept", "")
+        # If client explicitly requests HTML or text/html (like a web browser)
+        if "text/html" in accept_header and "application/json" not in accept_header:
+            from pathlib import Path
+            template_path = Path(__file__).parent / "templates" / "dashboard.html"
+            if template_path.exists():
+                return HTMLResponse(content=template_path.read_text(encoding="utf-8"))
+        
+        return JSONResponse(
+            content={
+                "status": "online",
+                "service": "ShieldPay Dual-Head Risk Engine",
+                "version": "2.0.0",
+                "docs": "/docs",
+                "dashboard": "/dashboard",
+            }
+        )
+
+    @app.get(
+        "/health",
         tags=["Health"],
-        summary="Service health check",
+        summary="Service health check JSON",
         response_class=JSONResponse,
     )
     async def health_check() -> dict:
@@ -112,6 +149,7 @@ def create_app() -> FastAPI:
             "service": "ShieldPay Dual-Head Risk Engine",
             "version": "2.0.0",
             "docs": "/docs",
+            "dashboard": "/dashboard",
         }
 
     return app
