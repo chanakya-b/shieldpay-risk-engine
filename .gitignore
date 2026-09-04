@@ -11,3 +11,4 @@ env/
 ENV/
 .DS_Store
 chargeback_evidence_package.json
+shieldpay_explained.md
