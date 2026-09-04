@@ -255,7 +255,19 @@ python -m pytest tests/ -v
 python -m uvicorn app.main:app --reload --port 8000
 ```
 
-#### 5. Containerized Deployment (Docker Alternative)
+#### 5. Launch Interactive Risk Portal (Streamlit Live UI)
+```bash
+# Launch interactive dark-mode Risk Operations Portal
+streamlit run demo_app.py
+```
+
+#### 6. Run Empirical SLA & Latency Benchmark
+```bash
+# Execute asynchronous load benchmark (500 concurrent requests)
+python benchmark.py --requests 500 --concurrency 25
+```
+
+#### 7. Containerized Deployment (Docker Alternative)
 ```bash
 # Build multi-stage production Docker container
 docker build -t shieldpay:latest .
@@ -267,7 +279,7 @@ docker run -d -p 8000:8000 --name shieldpay_api shieldpay:latest
 curl -i http://localhost:8000/
 ```
 
-#### 6. Live Verification `curl` Request
+#### 8. Live Verification `curl` Request
 Execute a scoring webhook request against the running risk engine:
 
 ```bash
