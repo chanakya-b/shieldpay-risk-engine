@@ -219,49 +219,56 @@ Evaluated over $N = 2,000$ synthetic validation transactions modeled on quick-co
 
 ---
 
-## ⚡ Quickstart & Verification Guide
+## ⚡ Quickstart Guide (1-Minute Setup)
 
-### 1. Local Setup (30 Seconds)
-
+#### 1. Clone & Setup Workspace
 ```bash
-# Clone repository
+# Clone the repository and navigate into the project directory
 git clone https://github.com/chanakya-b/shieldpay-risk-engine.git
 cd shieldpay-risk-engine
+```
 
-# Create virtual environment & activate
-python3 -m venv venv
-source venv/bin/activate
+#### 2. Environment Setup & Installation
+```bash
+# Create virtual environment
+python3 -m venv venv   # macOS / Linux
+# python -m venv venv  # Windows
+
+# Activate virtual environment
+source venv/bin/activate      # macOS / Linux
+# venv\Scripts\activate       # Windows (cmd / PowerShell)
 
 # Install locked dependencies
+pip install --upgrade pip
 pip install -r requirements.txt
-
-# Run pytest test suite (65 tests)
-pytest tests/ -v
 ```
 
-### 2. Start the API Server
-
+#### 3. Run Automated Test Suite (65/65 Passing)
 ```bash
-# Run FastAPI via Uvicorn development server
-uvicorn app.main:app --reload --port 8000
+# Execute full unit & integration test suite
+python -m pytest tests/ -v
 ```
 
-### 3. Docker Deployment
-
+#### 4. Launch FastAPI API Server
 ```bash
-# Build multi-stage production container
+# Run FastAPI application via Uvicorn development server
+python -m uvicorn app.main:app --reload --port 8000
+```
+
+#### 5. Containerized Deployment (Docker Alternative)
+```bash
+# Build multi-stage production Docker container
 docker build -t shieldpay:latest .
 
-# Run containerized service
+# Run containerized service on port 8000
 docker run -d -p 8000:8000 --name shieldpay_api shieldpay:latest
 
-# Verify health check
+# Verify health status
 curl -i http://localhost:8000/
 ```
 
-### 4. Verification `curl` Request
-
-Execute a scoring webhook request against the running service:
+#### 6. Live Verification `curl` Request
+Execute a scoring webhook request against the running risk engine:
 
 ```bash
 curl -i -X POST "http://localhost:8000/api/v1/score-webhook" \
@@ -282,8 +289,7 @@ curl -i -X POST "http://localhost:8000/api/v1/score-webhook" \
   }'
 ```
 
-#### Expected Response Body & Headers
-
+#### Expected HTTP Response & Headers
 ```http
 HTTP/1.1 200 OK
 date: Wed, 04 Sep 2026 08:30:00 GMT
