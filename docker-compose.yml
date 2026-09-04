@@ -1,0 +1,66 @@
+version: "3.9"
+
+services:
+  # ─────────────────────────────────────────────────────────────────────────
+  # ShieldPay Risk Engine API
+  # ─────────────────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    image: shieldpay:latest
+    container_name: shieldpay_api
+    ports:
+      - "8000:8000"
+    environment:
+      ENVIRONMENT: production
+      LOG_LEVEL: INFO
+      FRAUD_THRESHOLD_STEP_UP: "0.15"
+      FRAUD_THRESHOLD_HARD_BLOCK: "0.50"
+      ABUSE_THRESHOLD_PHOTO_PROOF: "0.35"
+      ABUSE_THRESHOLD_DENY: "0.65"
+    # In production: mount model artifacts from a versioned object store
+    # volumes:
+    #   - ./models:/app/models:ro
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8000/')"]
+      interval: 15s
+      timeout: 5s
+      start_period: 12s
+      retries: 3
+    restart: unless-stopped
+    # Resource constraints — tune to your instance size
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # Test runner (docker compose run tests)
+  # Runs the full pytest suite against the source tree (not the built image)
+  # so tests execute without rebuilding every time.
+  # ─────────────────────────────────────────────────────────────────────────
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder    # re-use the builder stage which has all deps
+    image: shieldpay:test
+    container_name: shieldpay_tests
+    working_dir: /workspace
+    volumes:
+      - .:/workspace    # mount source so edits are reflected immediately
+    environment:
+      ENVIRONMENT: development
+      LOG_LEVEL: WARNING   # suppress INFO logs during test runs
+    command: >
+      sh -c "pip install --quiet pytest pytest-asyncio httpx pydantic-settings &&
+             pytest tests/ -v --tb=short"
+    profiles:
+      - test             # only starts with: docker compose --profile test up tests

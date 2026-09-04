@@ -1,0 +1,12 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = [
+    "--tb=short",
+    "-q",
+    "--strict-markers",
+]
+markers = [
+    "integration: marks tests that require a running server (deselect with '-m not integration')",
+    "slow: marks tests that are intentionally slow",
+]

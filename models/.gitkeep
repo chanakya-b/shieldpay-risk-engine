@@ -1,0 +1,2 @@
+# Models directory — stores trained ML artifacts
+# model_fraud.pkl, model_abuse.pkl, encoder.pkl are placed here at training time.
