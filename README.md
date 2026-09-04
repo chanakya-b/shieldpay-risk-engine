@@ -146,7 +146,7 @@ ShieldPay translates raw probabilities $(P_{\text{fraud}}, P_{\text{abuse}})$ in
           └───────────────────────────────────────┴───────────────────────┴───────┘
 ```
 
-| Risk Vector | Probability | Action / Decision | Operational Impact & Rationale |
+| Risk Vector | Probability | Action | Operational Impact |
 | :--- | :--- | :--- | :--- |
 | **Payment Fraud** | $P < 0.15$ | `AUTO_APPROVE`<br><sub>Status: `DISPATCHED_TO_KITCHEN`</sub> | Zero-friction order acceptance and instant kitchen dispatch for seamless merchant checkout. |
 | **Payment Fraud** | $0.15 \le P < 0.50$ | `STEP_UP_OTP_REQUIRED`<br><sub>Status: `HOLD_PENDING_VERIFICATION`</sub> | Triggers 2FA / 3DS OTP re-verification to confirm cardholder identity before order acceptance. |
