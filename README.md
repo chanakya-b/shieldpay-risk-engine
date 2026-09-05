@@ -217,7 +217,7 @@ Evaluated over $N = 2,000$ synthetic validation transactions modeled on quick-co
 | **Refund Abuse Head** | **0.948** | **0.35** | 84.7% | 91.8% | ₹215,000 | **₹103,600** | **$-51.8\%$** |
 | **Combined System** | — | — | — | — | ₹697,000 | **₹276,100** | **$-60.4\%$** |
 
-> **Note on data:** These metrics are computed on a synthetically generated validation set (see `generate_zomato_dataset.py`), where fraud/abuse ground-truth labels are derived from a hand-specified weighted rule rather than observed real-world fraud. As such, these numbers demonstrate that the model can recover known decision boundaries and that the cost-optimized thresholding methodology ($\tau^*$) works as intended — they are not a claim of validated performance on live transaction data. Before production use, $\tau^*$ should be re-derived against real labeled chargeback/refund-abuse data.
+> **Note on data:** These metrics are computed on a synthetically generated validation set (see `generate_zomato_dataset.py`), where fraud/abuse ground-truth labels are derived from a hand-specified weighted rule rather than observed real-world fraud. As such, these numbers demonstrate that the model can recover known decision boundaries and that the cost-optimized thresholding methodology (**τ***) works as intended — they are not a claim of validated performance on live transaction data. Before production use, **τ*** should be re-derived against real labeled chargeback/refund-abuse data.
 
 ---
 
