@@ -28,7 +28,7 @@ COPY app/ ./app/
 
 # Copy ML artifacts from models/ directory
 COPY models/ ./models/
-COPY model_fraud.pkl model_abuse.pkl encoder.pkl ./
+#COPY model_fraud.pkl model_abuse.pkl encoder.pkl ./
 
 ENV ENVIRONMENT=production \
     LOG_LEVEL=INFO \
