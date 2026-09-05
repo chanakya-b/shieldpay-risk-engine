@@ -1,6 +1,6 @@
 # 🛡️ ShieldPay — Dual-Head Real-Time Risk & Fraud Engine
 
-![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)
+![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115%2B-009688.svg)
 ![Scikit-Learn](https://img.shields.io/badge/scikit--learn-1.4%2B-F7931E.svg)
 ![SLA Sub-50ms](https://img.shields.io/badge/SLA-Sub--50ms%20Hot%20Path-brightgreen.svg)
